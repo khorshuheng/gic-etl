@@ -1,3 +1,3 @@
 env "local" {
-  url = "sqlite://local.db"
+  url = "sqlite://database/local.db"
 }

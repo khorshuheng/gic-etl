@@ -220,8 +220,8 @@ __marimo__/
 *.iml
 
 # Project
-data
-local.db
+database/alocal.db
+data/external-funds
 
 # Spark
 jars

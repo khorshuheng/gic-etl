@@ -14,25 +14,33 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--src-dir", required=True, type=str)
     parser.add_argument("-d", "--dest-url", required=True, type=str)
+    parser.add_argument(
+        "-j",
+        "--jars",
+        required=False,
+        type=str,
+        default="jars/sqlite-jdbc-3.51.0.0.jar",
+    )
     return parser.parse_args()
 
 
-def create_spark_session() -> SparkSession:
+def create_spark_session(spark_jars: str) -> SparkSession:
     spark_session = (
         SparkSession.builder.master("local[*]")
-        .config("spark.jars", "jars/sqlite-jdbc-3.51.0.0.jar")
-        .config("spark.driver.extraClassPath", "jars/sqlite-jdbc-3.51.0.0.jar")
+        .config("spark.jars", spark_jars)
+        .config("spark.driver.extraClassPath", spark_jars)
         .getOrCreate()
     )
 
     return spark_session
 
 
-if __name__ == "__main__":
+def main():
     spark_session = None
     try:
-        spark_session = create_spark_session()
         config = parse_args()
+        spark_jars = config.jars
+        spark_session = create_spark_session(spark_jars)
         ingest_external_funds(
             spark_session,
             IngestionConfig(
@@ -48,3 +56,7 @@ if __name__ == "__main__":
         if spark_session:
             spark_session.stop()
             print("Spark Session stopped.")
+
+
+if __name__ == "__main__":
+    main()

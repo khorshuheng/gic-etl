@@ -1,5 +1,5 @@
 [project]
-name = "gic-etl"
+name = "gic"
 version = "0.1.0"
 description = ""
 authors = [
@@ -11,9 +11,15 @@ dependencies = [
     "pyspark (>=4.0.1,<5.0.0)",
 ]
 
-[tool.mypy]
-explicit_package_bases = true
-files = ["src", "tests"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = [
+    "tests",
+]
+markers = [
+    "integration"
+]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
@@ -23,5 +29,6 @@ build-backend = "poetry.core.masonry.api"
 dev = [
     "pytest (>=8.4.2,<9.0.0)",
     "mypy (>=1.18.2,<2.0.0)",
-    "flake8 (>=7.3.0,<8.0.0)"
+    "flake8 (>=7.3.0,<8.0.0)",
+    "black (>=25.9.0,<26.0.0)"
 ]
