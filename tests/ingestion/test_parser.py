@@ -13,7 +13,6 @@ from gic.ingestion.parser import (
     parse_fund_ingestion_timestamp,
     MDYDateParser,
     PrefixBasedFundNameParser,
-    FundName,
     parse_fund_name,
 )
 

@@ -27,21 +27,21 @@ def insert_mock_fund_position_data(db_path: str):
 
         cursor.executemany(
             """
-        INSERT INTO fund_positions 
-        (
-            "FINANCIAL TYPE",
-            "SYMBOL",
-            "SECURITY NAME",
-            "PRICE",
-            "REALISED P/L",
-            "QUANTITY",
-            "MARKET VALUE",
-            "FUND NAME",
-            "TIMESTAMP",
-            "YEAR",
-            "MONTH"
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
+            INSERT INTO fund_positions
+            (
+                "FINANCIAL TYPE",
+                "SYMBOL",
+                "SECURITY NAME",
+                "PRICE",
+                "REALISED P/L",
+                "QUANTITY",
+                "MARKET VALUE",
+                "FUND NAME",
+                "TIMESTAMP",
+                "YEAR",
+                "MONTH"
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
             rows,
         )
 

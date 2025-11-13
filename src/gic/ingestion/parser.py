@@ -3,11 +3,11 @@ import datetime
 import enum
 import os
 import re
-from typing import List, Self
+from typing import List
 from urllib.parse import unquote
 
 from pyspark.sql.functions import udf
-from pyspark.sql.types import DateType, StringType, IntegerType, LongType
+from pyspark.sql.types import StringType, LongType
 
 
 class FundName(enum.StrEnum):
@@ -176,7 +176,7 @@ def parse_fund_ingestion_timestamp(file_name: str) -> int:
     )
     if fund_name == FundName.UNKNOWN:
         raise InvalidFundNameException(file_name)
-    parser = None
+    parser: DateParser | None = None
     match fund_name:
         case FundName.APPLEBEAD | FundName.WHITESTONE | FundName.MAGNUM:
             parser = USFormatParser()
