@@ -2,7 +2,17 @@ import dataclasses
 from typing import Optional
 
 from pyspark.sql import DataFrame, Window, SparkSession
-from pyspark.sql.functions import col, to_date, lit, rank, month, when, year
+from pyspark.sql.functions import (
+    col,
+    to_date,
+    lit,
+    rank,
+    month,
+    when,
+    year,
+    first_value,
+    last_value,
+)
 
 from gic.constants.column import (
     INSTRUMENT_IDENTIFIER_COLUMN,
@@ -10,6 +20,8 @@ from gic.constants.column import (
     MONTH_COLUMN,
     EOM_PRICE_COLUMN,
     PRICE_BREAK_COLUMN,
+    PRICE_COLUMN,
+    BOM_PRICE_COLUMN,
 )
 from gic.constants.table import BOND_PRICES, EQUITY_PRICES, FUND_POSITIONS
 from gic.ingestion.external_funds import YEAR_COLUMN, FUND_NAME_COLUMN, DATETIME_COLUMN
@@ -43,22 +55,33 @@ def combined_instrument_pricing(
     return bond_pricing.unionAll(equity_pricing)
 
 
-def eom_pricing(pricing: DataFrame) -> DataFrame:
+def eom_and_bom_pricing(pricing: DataFrame) -> DataFrame:
     pricing = pricing.withColumn(YEAR_COLUMN, year(col(DATETIME_COLUMN)))
     pricing = pricing.withColumn(MONTH_COLUMN, month(col(DATETIME_COLUMN)))
-    eom_window = Window.partitionBy(INSTRUMENT_IDENTIFIER_COLUMN, MONTH_COLUMN).orderBy(
-        col(DATETIME_COLUMN).desc()
+    unbounded_window = (
+        Window.partitionBy(INSTRUMENT_IDENTIFIER_COLUMN, MONTH_COLUMN, YEAR_COLUMN)
+        .orderBy(col(DATETIME_COLUMN))
+        .rowsBetween(Window.unboundedPreceding, Window.unboundedFollowing)
     )
-    pricing = pricing.withColumn("_RANK", rank().over(eom_window)).filter(
-        col("_RANK") == 1
+    date_window = Window.partitionBy(
+        INSTRUMENT_IDENTIFIER_COLUMN, MONTH_COLUMN, YEAR_COLUMN
+    ).orderBy(col(DATETIME_COLUMN).desc())
+    pricing = (
+        pricing.withColumn(
+            EOM_PRICE_COLUMN, last_value(col(PRICE_COLUMN)).over(unbounded_window)
+        )
+        .withColumn(
+            BOM_PRICE_COLUMN, first_value(col(PRICE_COLUMN)).over(unbounded_window)
+        )
+        .withColumn("_RANK", rank().over(date_window))
+        .filter(col("_RANK") == 1)
     )
-    pricing = pricing.drop("_RANK")
-    pricing = pricing.withColumnRenamed("PRICE", EOM_PRICE_COLUMN)
     return pricing.select(
         YEAR_COLUMN,
         MONTH_COLUMN,
         INSTRUMENT_IDENTIFIER_COLUMN,
         EOM_PRICE_COLUMN,
+        BOM_PRICE_COLUMN,
     )
 
 
@@ -112,6 +135,6 @@ def generate_pricing_reconciliation_report(spark_session: SparkSession, config: 
         spark_session, config.src_url
     )
     fund_position_df = get_fund_position_df(spark_session, config.src_url)
-    eom_pricing_df = eom_pricing(combined_instrument_pricing_df)
+    eom_pricing_df = eom_and_bom_pricing(combined_instrument_pricing_df)
     report_df = pricing_reconciliation(eom_pricing_df, fund_position_df)
     report_df.write.csv(path=config.dest_path, mode="overwrite", header=True)
