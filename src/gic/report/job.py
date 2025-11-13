@@ -2,26 +2,11 @@ import sys
 
 from pyspark.sql import SparkSession
 
+from gic.config import parse_config
 from gic.report.pricing import (
     generate_pricing_reconciliation_report,
-    Config as ReportConfig,
+    generate_top_performing_fund_report,
 )
-
-import argparse
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-s", "--src-url", required=True, type=str)
-    parser.add_argument("-d", "--dest-path", required=True, type=str)
-    parser.add_argument(
-        "-j",
-        "--jars",
-        required=False,
-        type=str,
-        default="jars/sqlite-jdbc-3.51.0.0.jar",
-    )
-    return parser.parse_args()
 
 
 def create_spark_session(spark_jars: str) -> SparkSession:
@@ -38,15 +23,18 @@ def create_spark_session(spark_jars: str) -> SparkSession:
 def main():
     spark_session = None
     try:
-        config = parse_args()
-        spark_jars = config.jars
+        config = parse_config()
+        spark_jars = config.datastore.driver_jar_path
         spark_session = create_spark_session(spark_jars)
         generate_pricing_reconciliation_report(
-            spark_session,
-            ReportConfig(
-                src_url=config.src_url,
-                dest_path=config.dest_path,
-            ),
+            spark_session=spark_session,
+            datastore_url=config.datastore.url,
+            dest_path=config.report.pricing_reconciliation.dest,
+        )
+        generate_top_performing_fund_report(
+            spark_session=spark_session,
+            datastore_url=config.datastore.url,
+            dest_path=config.report.top_performing_funds.dest,
         )
 
     except Exception as e:

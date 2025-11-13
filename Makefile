@@ -1,7 +1,5 @@
 ENV = local
-EXTERNAL_FUND_SRC_DIR = "data/external-funds"
-LOCAL_DB_URL = "jdbc:sqlite:database/local.db"
-PRICING_RECONCILIATION_REPORT_PATH = "reports/pricing_reconciliation_report"
+CONFIG_PATH = "config/dev.yaml"
 
 .PHONY: migrate-hash
 migrate-hash:
@@ -30,11 +28,11 @@ integration-test:
 
 .PHONY: ingestion
 ingestion:
-	poetry run python -m gic.ingestion.job -s ${EXTERNAL_FUND_SRC_DIR} -d ${LOCAL_DB_URL}
+	poetry run python -m gic.ingestion.job -c ${CONFIG_PATH}
 
 .PHONY: report
 report:
-	poetry run python -m gic.report.job -s ${LOCAL_DB_URL} -d ${PRICING_RECONCILIATION_REPORT_PATH}
+	poetry run python -m gic.report.job -c ${CONFIG_PATH}
 
 .PHONY: package
 package:

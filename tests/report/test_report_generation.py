@@ -6,7 +6,6 @@ from pyspark.testing import assertDataFrameEqual
 
 from gic.report.pricing import (
     generate_pricing_reconciliation_report,
-    Config,
     generate_top_performing_fund_report,
 )
 
@@ -15,10 +14,10 @@ from gic.report.pricing import (
 def test_pricing_reconciliation_report_generation(
     spark_session: SparkSession, temp_sqlite_database_path: str, temp_dir: str
 ) -> None:
-    src_url = f"jdbc:sqlite:{temp_sqlite_database_path}"
+    datastore_url = f"jdbc:sqlite:{temp_sqlite_database_path}"
     dest_path = f"file://{temp_dir}/pricing_reconciliation_report"
     generate_pricing_reconciliation_report(
-        spark_session, Config(src_url=src_url, dest_path=dest_path)
+        spark_session=spark_session, datastore_url=datastore_url, dest_path=dest_path
     )
     report_df = spark_session.read.csv(dest_path, inferSchema=True, header=True)
     expected_df = (
@@ -48,10 +47,10 @@ def test_pricing_reconciliation_report_generation(
 def test_top_performing_fund_report_generation(
     spark_session: SparkSession, temp_sqlite_database_path: str, temp_dir: str
 ) -> None:
-    src_url = f"jdbc:sqlite:{temp_sqlite_database_path}"
+    datastore_url = f"jdbc:sqlite:{temp_sqlite_database_path}"
     dest_path = f"file://{temp_dir}/top_performing_fund_report"
     generate_top_performing_fund_report(
-        spark_session, Config(src_url=src_url, dest_path=dest_path)
+        spark_session=spark_session, datastore_url=datastore_url, dest_path=dest_path
     )
     report_df = spark_session.read.csv(
         dest_path, inferSchema=True, header=True

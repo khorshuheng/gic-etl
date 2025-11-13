@@ -2,26 +2,10 @@ import sys
 
 from pyspark.sql import SparkSession
 
+from gic.config import parse_config
 from gic.ingestion.external_funds import (
     ingest_external_funds,
-    Config as IngestionConfig,
 )
-
-import argparse
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-s", "--src-dir", required=True, type=str)
-    parser.add_argument("-d", "--dest-url", required=True, type=str)
-    parser.add_argument(
-        "-j",
-        "--jars",
-        required=False,
-        type=str,
-        default="jars/sqlite-jdbc-3.51.0.0.jar",
-    )
-    return parser.parse_args()
 
 
 def create_spark_session(spark_jars: str) -> SparkSession:
@@ -38,15 +22,13 @@ def create_spark_session(spark_jars: str) -> SparkSession:
 def main():
     spark_session = None
     try:
-        config = parse_args()
-        spark_jars = config.jars
+        config = parse_config()
+        spark_jars = config.datastore.driver_jar_path
         spark_session = create_spark_session(spark_jars)
         ingest_external_funds(
-            spark_session,
-            IngestionConfig(
-                src_dir=config.src_dir,
-                dest_url=config.dest_url,
-            ),
+            spark_session=spark_session,
+            data_store_url=config.datastore.url,
+            external_fund_src=config.ingestion.external_funds.src
         )
 
     except Exception as e:

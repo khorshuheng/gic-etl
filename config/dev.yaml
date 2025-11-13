@@ -1,0 +1,15 @@
+datastore:
+  # Spark destination for the ingested data
+  url: "jdbc:sqlite:database/local.db"
+  driver_jar_path: "jars/sqlite-jdbc-3.51.0.0.jar"
+ingestion:
+  external_funds:
+    # External funds data source, in CSV
+    src: "data/external-funds"
+report:
+  pricing_reconciliation:
+    # Output path for pricing reconciliation report
+    dest: "reports/pricing_reconciliation"
+  top_performing_funds:
+    # Output path for top performing fund report
+    dest: "reports/top_performing_fund"

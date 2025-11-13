@@ -1,6 +1,3 @@
-import dataclasses
-from typing import Optional
-
 from pyspark.sql import DataFrame, Window, SparkSession
 from pyspark.sql.functions import (
     col,
@@ -29,17 +26,10 @@ from gic.constants.column import (
     FUND_MV_START_COLUMN,
     FUND_MV_END_COLUMN,
     FUND_REALISED_PL_COLUMN,
+    DATETIME_COLUMN,
 )
 from gic.constants.table import BOND_PRICES, EQUITY_PRICES, FUND_POSITIONS
-from gic.ingestion.external_funds import YEAR_COLUMN, FUND_NAME_COLUMN, DATETIME_COLUMN
-
-
-@dataclasses.dataclass
-class Config:
-    src_url: str
-    dest_path: str
-    year: Optional[int] = None
-    month: Optional[int] = None
+from gic.ingestion.external_funds import YEAR_COLUMN, FUND_NAME_COLUMN
 
 
 def combined_instrument_pricing(
@@ -198,24 +188,26 @@ def get_fund_position_df(spark_session: SparkSession, src_url: str) -> DataFrame
     return fund_position_df
 
 
-def generate_pricing_reconciliation_report(spark_session: SparkSession, config: Config):
+def generate_pricing_reconciliation_report(
+    spark_session: SparkSession, datastore_url: str, dest_path: str
+) -> None:
     combined_instrument_pricing_df = get_combined_instrument_pricing_df(
-        spark_session, config.src_url
+        spark_session, datastore_url
     )
-    fund_position_df = get_fund_position_df(spark_session, config.src_url)
+    fund_position_df = get_fund_position_df(spark_session, datastore_url)
     eom_pricing_df = eom_and_bom_pricing(combined_instrument_pricing_df)
     report_df = pricing_reconciliation(eom_pricing_df, fund_position_df)
-    report_df.write.csv(path=config.dest_path, mode="overwrite", header=True)
+    report_df.write.csv(path=dest_path, mode="overwrite", header=True)
 
 
-def generate_top_performing_fund_report(spark_session: SparkSession, config: Config):
+def generate_top_performing_fund_report(
+    spark_session: SparkSession, datastore_url: str, dest_path: str
+):
     combined_instrument_pricing_df = get_combined_instrument_pricing_df(
-        spark_session, config.src_url
+        spark_session, datastore_url
     )
-    fund_position_df = get_fund_position_df(spark_session, config.src_url)
+    fund_position_df = get_fund_position_df(spark_session, datastore_url)
     eom_and_bom_pricing_df = eom_and_bom_pricing(combined_instrument_pricing_df)
     fund_performance_df = fund_performance(eom_and_bom_pricing_df, fund_position_df)
     top_performing_fund_df = top_performing_fund(fund_performance_df)
-    top_performing_fund_df.write.csv(
-        path=config.dest_path, mode="overwrite", header=True
-    )
+    top_performing_fund_df.write.csv(path=dest_path, mode="overwrite", header=True)
