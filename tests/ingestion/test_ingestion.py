@@ -11,7 +11,7 @@ def test_external_fund_ingestion(
     pytestconfig, temp_sqlite_database_path: str, spark_session: SparkSession
 ) -> None:
     root = pytestconfig.rootpath.resolve()
-    src_dir = (root / "tests" / "data" / "external-funds").resolve()
+    src_dir = (root / "tests" / "ingestion" / "data" / "external-funds").resolve()
     ingest_external_funds(
         spark_session,
         Config(
