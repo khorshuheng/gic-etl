@@ -16,6 +16,7 @@ def insert_mock_fund_position_data(db_path: str):
                 "TJX Companies",
                 80.0,
                 12225.84,
+                100.0,
                 2970435.98,
                 "Applebead",
                 1669737600,
@@ -33,12 +34,13 @@ def insert_mock_fund_position_data(db_path: str):
             "SECURITY NAME",
             "PRICE",
             "REALISED P/L",
+            "QUANTITY",
             "MARKET VALUE",
             "FUND NAME",
             "TIMESTAMP",
             "YEAR",
             "MONTH"
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
             rows,
         )
