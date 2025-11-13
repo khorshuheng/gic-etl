@@ -14,6 +14,7 @@ class ExternalFundsIngestion(BaseModel):
 
 
 class Ingestion(BaseModel):
+    checkpoint: str
     external_funds: ExternalFundsIngestion
 
 

@@ -3,6 +3,7 @@ datastore:
   url: "jdbc:sqlite:database/local.db"
   driver_jar_path: "jars/sqlite-jdbc-3.51.0.0.jar"
 ingestion:
+  checkpoint: checkpoint
   external_funds:
     # External funds data source, in CSV
     src: "data/external-funds"

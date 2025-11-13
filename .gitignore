@@ -222,7 +222,8 @@ __marimo__/
 # Project
 database/local.db
 data/external-funds
-reports
+reports/
 
 # Spark
 jars
+checkpoint

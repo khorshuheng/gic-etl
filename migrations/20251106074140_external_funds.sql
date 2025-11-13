@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS fund_positions (
     "FUND NAME" TEXT,
     "TIMESTAMP" INTEGER,
     "YEAR" INTEGER,
-    "MONTH" INTEGER
+    "MONTH" INTEGER,
+    CONSTRAINT unique_position UNIQUE ("FUND NAME", "YEAR", "MONTH", "SYMBOL")
 );
 CREATE INDEX idx_fund_name ON fund_positions("FUND NAME");
 CREATE INDEX idx_fund_year ON fund_positions("YEAR");

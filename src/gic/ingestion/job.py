@@ -28,7 +28,7 @@ def main():
         ingest_external_funds(
             spark_session=spark_session,
             data_store_url=config.datastore.url,
-            external_fund_src=config.ingestion.external_funds.src
+            external_fund_src=config.ingestion.external_funds.src,
         )
 
     except Exception as e:

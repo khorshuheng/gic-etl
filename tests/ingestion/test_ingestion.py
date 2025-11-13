@@ -8,7 +8,7 @@ from gic.ingestion.external_funds import ingest_external_funds
 
 @pytest.mark.integration
 def test_external_fund_ingestion(
-    pytestconfig, temp_sqlite_database_path: str, spark_session: SparkSession
+    pytestconfig, temp_sqlite_database_path: str, spark_session: SparkSession, temp_dir
 ) -> None:
     root = pytestconfig.rootpath.resolve()
     src_dir = (root / "tests" / "ingestion" / "data" / "external-funds").resolve()
@@ -16,6 +16,7 @@ def test_external_fund_ingestion(
         spark_session=spark_session,
         data_store_url=f"jdbc:sqlite:{temp_sqlite_database_path}",
         external_fund_src=str(src_dir),
+        checkpoint=temp_dir,
     )
     with sqlite3.connect(temp_sqlite_database_path) as conn:
         cursor = conn.cursor()
