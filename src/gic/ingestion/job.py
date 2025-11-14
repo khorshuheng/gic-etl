@@ -29,6 +29,7 @@ def main():
             spark_session=spark_session,
             data_store_url=config.datastore.url,
             external_fund_src=config.ingestion.external_funds.src,
+            checkpoint=config.ingestion.checkpoint,
         )
 
     except Exception as e:
